@@ -9,6 +9,14 @@ export default function App() {
   const [selectedDistrict, setSelectedDistrict] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [layerSettings, setLayerSettings] = useState({
+    temperature: { visible: true, opacity: 0.75 },
+    pm25:        { visible: true, opacity: 0.78 },
+    heat:        { visible: true, opacity: 0.78 },
+  });
+  const updateLayerSetting = useCallback((id, key, value) => {
+    setLayerSettings(prev => ({ ...prev, [id]: { ...prev[id], [key]: value } }));
+  }, []);
   const [forecastDatetime, setForecastDatetime] = useState(() => {
     const now = new Date();
     const h = Math.floor(now.getUTCHours() / 3) * 3;
@@ -34,6 +42,7 @@ export default function App() {
         onDistrictClick={handleDistrictSelect}
         onMapClick={handleMapClick}
         forecastDatetime={forecastDatetime}
+        layerSettings={layerSettings}
       />
       <Sidebar
         activeLayer={activeLayer}
@@ -44,6 +53,8 @@ export default function App() {
         onSearchChange={setSearchQuery}
         isOpen={sidebarOpen}
         onToggle={() => setSidebarOpen((v) => !v)}
+        layerSettings={layerSettings}
+        onLayerSettingChange={updateLayerSetting}
       />
       {activeLayer === 'temperature' && (
         <ForecastTimePicker

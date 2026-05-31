@@ -10,6 +10,8 @@ import {
   FaMapMarkerAlt,
   FaTint,
   FaLeaf,
+  FaEye,
+  FaEyeSlash,
 } from 'react-icons/fa';
 import { MdLocationCity } from 'react-icons/md';
 import {
@@ -260,6 +262,8 @@ export default function Sidebar({
   onSearchChange,
   isOpen,
   onToggle,
+  layerSettings,
+  onLayerSettingChange,
 }) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchRef = useRef(null);
@@ -431,44 +435,84 @@ export default function Sidebar({
               {LAYER_BUTTONS.map((btn) => {
                 const Icon = btn.icon;
                 const isActive = activeLayer === btn.id;
+                const settings = layerSettings?.[btn.id] ?? { visible: true, opacity: 0.75 };
                 return (
-                  <button
+                  <div
                     key={btn.id}
-                    onClick={() => onLayerChange(btn.id)}
-                    className="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-left transition-all duration-200"
+                    className="rounded-xl overflow-hidden transition-all duration-200"
                     style={{
-                      background: isActive ? btn.activeBg : 'rgba(30,41,59,0.4)',
                       border: `1px solid ${isActive ? btn.activeBorder : 'rgba(255,255,255,0.06)'}`,
                       boxShadow: isActive ? `0 0 16px ${btn.activeBorder}` : 'none',
                     }}
                   >
-                    <div
-                      className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                    {/* Layer select button */}
+                    <button
+                      onClick={() => onLayerChange(btn.id)}
+                      className="w-full flex items-center gap-3 px-3.5 py-3 text-left transition-all duration-200"
                       style={{
-                        background: isActive ? `${btn.iconColor}20` : 'rgba(255,255,255,0.04)',
+                        background: isActive ? btn.activeBg : 'rgba(30,41,59,0.4)',
                       }}
                     >
-                      <Icon
-                        size={14}
-                        style={{ color: isActive ? btn.iconColor : '#475569' }}
-                      />
-                    </div>
-                    <span
-                      className="text-sm font-medium"
-                      style={{ color: isActive ? '#e2e8f0' : '#64748b' }}
-                    >
-                      {btn.label}
-                    </span>
+                      <div
+                        className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                        style={{ background: isActive ? `${btn.iconColor}20` : 'rgba(255,255,255,0.04)' }}
+                      >
+                        <Icon size={14} style={{ color: isActive ? btn.iconColor : '#475569' }} />
+                      </div>
+                      <span className="text-sm font-medium" style={{ color: isActive ? '#e2e8f0' : '#64748b' }}>
+                        {btn.label}
+                      </span>
+                      {isActive && (
+                        <div
+                          className="ml-auto w-1.5 h-1.5 rounded-full"
+                          style={{ background: btn.iconColor, boxShadow: `0 0 6px ${btn.iconColor}` }}
+                        />
+                      )}
+                    </button>
+
+                    {/* Opacity + toggle controls — shown only when active */}
                     {isActive && (
                       <div
-                        className="ml-auto w-1.5 h-1.5 rounded-full"
+                        className="flex items-center gap-2.5 px-3.5 py-2"
                         style={{
-                          background: btn.iconColor,
-                          boxShadow: `0 0 6px ${btn.iconColor}`,
+                          background: `${btn.iconColor}0d`,
+                          borderTop: '1px solid rgba(255,255,255,0.05)',
                         }}
-                      />
+                      >
+                        {/* Toggle visibility */}
+                        <button
+                          onClick={() => onLayerSettingChange(btn.id, 'visible', !settings.visible)}
+                          title={settings.visible ? 'ซ่อนเลเยอร์' : 'แสดงเลเยอร์'}
+                          className="shrink-0 p-1 rounded transition-colors hover:bg-white/10"
+                        >
+                          {settings.visible
+                            ? <FaEye size={12} style={{ color: btn.iconColor }} />
+                            : <FaEyeSlash size={12} className="text-slate-500" />}
+                        </button>
+
+                        {/* Opacity slider */}
+                        <input
+                          type="range"
+                          min={0}
+                          max={1}
+                          step={0.05}
+                          value={settings.opacity}
+                          disabled={!settings.visible}
+                          onChange={(e) => onLayerSettingChange(btn.id, 'opacity', parseFloat(e.target.value))}
+                          className="flex-1 h-1 cursor-pointer disabled:cursor-not-allowed disabled:opacity-30"
+                          style={{ accentColor: btn.iconColor }}
+                        />
+
+                        {/* Opacity % label */}
+                        <span
+                          className="text-[11px] font-mono w-8 text-right shrink-0"
+                          style={{ color: settings.visible ? btn.iconColor : '#475569' }}
+                        >
+                          {Math.round(settings.opacity * 100)}%
+                        </span>
+                      </div>
                     )}
-                  </button>
+                  </div>
                 );
               })}
             </div>

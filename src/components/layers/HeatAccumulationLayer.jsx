@@ -1,7 +1,7 @@
 import { CircleMarker, Tooltip } from 'react-leaflet';
 import { getHeatColor, getHeatLevel } from '../../data/mockData';
 
-export default function HeatAccumulationLayer({ districts, onDistrictClick, selectedId }) {
+export default function HeatAccumulationLayer({ districts, onDistrictClick, selectedId, opacity = 1 }) {
   return (
     <>
       {districts.map((district) => {
@@ -18,7 +18,7 @@ export default function HeatAccumulationLayer({ districts, onDistrictClick, sele
               radius={baseRadius + 18}
               pathOptions={{
                 fillColor: color,
-                fillOpacity: 0.06,
+                fillOpacity: 0.06 * opacity,
                 stroke: false,
               }}
             />
@@ -28,7 +28,7 @@ export default function HeatAccumulationLayer({ districts, onDistrictClick, sele
               radius={baseRadius + 8}
               pathOptions={{
                 fillColor: color,
-                fillOpacity: 0.15,
+                fillOpacity: 0.15 * opacity,
                 stroke: false,
               }}
             />
@@ -38,7 +38,7 @@ export default function HeatAccumulationLayer({ districts, onDistrictClick, sele
               radius={baseRadius}
               pathOptions={{
                 fillColor: color,
-                fillOpacity: 0.30,
+                fillOpacity: 0.30 * opacity,
                 stroke: false,
               }}
             />
@@ -48,9 +48,10 @@ export default function HeatAccumulationLayer({ districts, onDistrictClick, sele
               radius={isSelected ? 14 : 10}
               pathOptions={{
                 fillColor: color,
-                fillOpacity: isSelected ? 1 : 0.88,
+                fillOpacity: (isSelected ? 1 : 0.88) * opacity,
                 color: isSelected ? '#fff' : 'rgba(255,255,255,0.4)',
                 weight: isSelected ? 2.5 : 1,
+                opacity,
               }}
               eventHandlers={{ click: () => onDistrictClick(district) }}
             >

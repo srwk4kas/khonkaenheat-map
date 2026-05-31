@@ -26,8 +26,9 @@ function MapClickHandler({ onMapClick }) {
   return null;
 }
 
-export default function MapView({ activeLayer, selectedDistrict, onDistrictClick, onMapClick, forecastDatetime }) {
+export default function MapView({ activeLayer, selectedDistrict, onDistrictClick, onMapClick, forecastDatetime, layerSettings }) {
   const selectedId = selectedDistrict?.id;
+  const s = (id) => layerSettings?.[id] ?? { visible: true, opacity: 0.75 };
 
   return (
     <MapContainer
@@ -58,31 +59,34 @@ export default function MapView({ activeLayer, selectedDistrict, onDistrictClick
         </div>
       </div>
 
-      {activeLayer === 'temperature' && forecastDatetime && (
-        <TMDTempTileLayer datetime={forecastDatetime} />
+      {activeLayer === 'temperature' && s('temperature').visible && forecastDatetime && (
+        <TMDTempTileLayer datetime={forecastDatetime} opacity={s('temperature').opacity} />
       )}
 
-      {activeLayer === 'temperature' && (
+      {activeLayer === 'temperature' && s('temperature').visible && (
         <TemperatureLayer
           districts={districts}
           onDistrictClick={onDistrictClick}
           selectedId={selectedId}
+          opacity={s('temperature').opacity}
         />
       )}
 
-      {activeLayer === 'pm25' && (
+      {activeLayer === 'pm25' && s('pm25').visible && (
         <PM25Layer
           districts={districts}
           onDistrictClick={onDistrictClick}
           selectedId={selectedId}
+          opacity={s('pm25').opacity}
         />
       )}
 
-      {activeLayer === 'heat' && (
+      {activeLayer === 'heat' && s('heat').visible && (
         <HeatAccumulationLayer
           districts={districts}
           onDistrictClick={onDistrictClick}
           selectedId={selectedId}
+          opacity={s('heat').opacity}
         />
       )}
     </MapContainer>

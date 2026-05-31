@@ -1,7 +1,7 @@
 import { CircleMarker, Tooltip } from 'react-leaflet';
 import { getPM25Color, getPM25Level } from '../../data/mockData';
 
-export default function PM25Layer({ districts, onDistrictClick, selectedId }) {
+export default function PM25Layer({ districts, onDistrictClick, selectedId, opacity = 1 }) {
   return (
     <>
       {districts.map((district) => {
@@ -16,9 +16,10 @@ export default function PM25Layer({ districts, onDistrictClick, selectedId }) {
             radius={isSelected ? 22 : 18}
             pathOptions={{
               fillColor: color,
-              fillOpacity: isSelected ? 0.95 : 0.78,
+              fillOpacity: (isSelected ? 0.95 : 0.78) * opacity,
               color: isSelected ? '#fff' : color,
               weight: isSelected ? 2.5 : 1.2,
+              opacity,
             }}
             eventHandlers={{ click: () => onDistrictClick(district) }}
           >
