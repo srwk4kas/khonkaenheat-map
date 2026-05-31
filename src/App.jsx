@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import MapView from './components/MapView';
 import Sidebar from './components/Sidebar';
+import ChatBot from './components/ChatBot';
 
 export default function App() {
   const [activeLayer, setActiveLayer] = useState('temperature');
@@ -37,6 +38,7 @@ export default function App() {
         isOpen={sidebarOpen}
         onToggle={() => setSidebarOpen((v) => !v)}
       />
+      <ChatBot />
     </div>
   );
 }
