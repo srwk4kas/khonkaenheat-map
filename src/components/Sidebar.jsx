@@ -13,6 +13,7 @@ import {
   FaEye,
   FaEyeSlash,
   FaWater,
+  FaSatelliteDish,
 } from 'react-icons/fa';
 import { MdLocationCity } from 'react-icons/md';
 import {
@@ -61,6 +62,15 @@ const LAYER_BUTTONS = [
     activeBg: 'rgba(14,165,233,0.15)',
     activeBorder: 'rgba(14,165,233,0.5)',
     iconColor: '#0EA5E9',
+  },
+  {
+    id: 'monthly_temp',
+    label: 'อุณหภูมิ MODIS รายเดือน',
+    icon: FaSatelliteDish,
+    activeColor: 'from-violet-500 to-purple-400',
+    activeBg: 'rgba(139,92,246,0.15)',
+    activeBorder: 'rgba(139,92,246,0.5)',
+    iconColor: '#8B5CF6',
   },
 ];
 

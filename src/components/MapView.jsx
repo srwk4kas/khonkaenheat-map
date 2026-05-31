@@ -6,6 +6,7 @@ import PM25Layer from './layers/PM25Layer';
 import HeatAccumulationLayer from './layers/HeatAccumulationLayer';
 import TMDTempTileLayer from './layers/TMDTempTileLayer';
 import StreamLayer from './layers/StreamLayer';
+import NASATempMonthlyLayer from './layers/NASATempMonthlyLayer';
 import 'leaflet/dist/leaflet.css';
 
 function BoundsLocker() {
@@ -27,7 +28,7 @@ function MapClickHandler({ onMapClick }) {
   return null;
 }
 
-export default function MapView({ activeLayer, selectedDistrict, onDistrictClick, onMapClick, forecastDatetime, layerSettings }) {
+export default function MapView({ activeLayer, selectedDistrict, onDistrictClick, onMapClick, forecastDatetime, layerSettings, selectedMonth }) {
   const selectedId = selectedDistrict?.id;
   const s = (id) => layerSettings?.[id] ?? { visible: true, opacity: 0.75 };
 
@@ -93,6 +94,10 @@ export default function MapView({ activeLayer, selectedDistrict, onDistrictClick
 
       {activeLayer === 'stream' && s('stream').visible && (
         <StreamLayer opacity={s('stream').opacity} />
+      )}
+
+      {activeLayer === 'monthly_temp' && s('monthly_temp').visible && selectedMonth && (
+        <NASATempMonthlyLayer month={selectedMonth} opacity={s('monthly_temp').opacity} />
       )}
     </MapContainer>
   );

@@ -409,4 +409,26 @@ export const layerInfo = {
       { color: '#EF4444', label: 'สูงมาก', desc: '> 80%' },
     ],
   },
+  stream: {
+    id: 'stream',
+    name: 'ร่องน้ำ',
+    description: 'แสดงเส้นทางร่องน้ำและลำน้ำในพื้นที่จังหวัดขอนแก่น ข้อมูลจากไฟล์ GeoJSON',
+    unit: 'เส้น',
+    legend: [
+      { color: '#38bdf8', label: 'ร่องน้ำ / ลำน้ำ', desc: 'Stream' },
+    ],
+  },
+  monthly_temp: {
+    id: 'monthly_temp',
+    name: 'อุณหภูมิพื้นผิวรายเดือน',
+    description: 'ข้อมูลอุณหภูมิพื้นผิวดิน (Land Surface Temperature) เฉลี่ยรายเดือน จากดาวเทียม MODIS Terra ของ NASA ความละเอียด 1 กม.',
+    unit: 'K (เคลวิน)',
+    legend: [
+      { color: '#313695', label: 'เย็นมาก', desc: '< 280 K' },
+      { color: '#4575b4', label: 'เย็น', desc: '280–295 K' },
+      { color: '#fee090', label: 'ปานกลาง', desc: '295–305 K' },
+      { color: '#f46d43', label: 'ร้อน', desc: '305–315 K' },
+      { color: '#a50026', label: 'ร้อนมาก', desc: '> 315 K' },
+    ],
+  },
 };
