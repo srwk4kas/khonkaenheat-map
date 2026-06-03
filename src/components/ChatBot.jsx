@@ -22,7 +22,7 @@ export default function ChatBot() {
   }
 
   return (
-    <div className="fixed bottom-6 right-44 z-[1000]">
+    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[1000]">
       <button
         onClick={openChat}
         title="เปิด AI Assistant"

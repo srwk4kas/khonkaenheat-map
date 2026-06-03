@@ -10,6 +10,32 @@ import NASATempMonthlyLayer from './layers/NASATempMonthlyLayer';
 import HotspotLayer from './layers/HotspotLayer';
 import 'leaflet/dist/leaflet.css';
 
+// ข้อมูลแหล่งดาวเทียมแต่ละปี (2000–2024)
+const HIST_MIN_YEAR = 2000;
+const HIST_MAX_YEAR = 2026;
+
+function getHistSource(year) {
+  // Sentinel-2 EOxCloudless มีข้อมูลถึงปี 2024 (annual mosaic)
+  if (year >= 2016 && year <= 2024) {
+    return {
+      url: `https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-${year}_3857/default/g/{z}/{y}/{x}.jpg`,
+      satellite: 'Sentinel-2',
+      resolution: '10m',
+      maxNativeZoom: 14,
+      attr: `Sentinel-2 cloudless ${year} &copy; <a href="https://eox.at">EOxCloudless</a>`,
+    };
+  }
+  // 2025–2026: MODIS Terra รายวัน (ใช้ข้อมูลกลางปี)
+  const modisDate = year >= 2025 ? `${year}-06-01` : `${year}-01-15`;
+  return {
+    url: `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_CorrectedReflectance_TrueColor/default/${modisDate}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`,
+    satellite: 'MODIS Terra',
+    resolution: '250m',
+    maxNativeZoom: 9,
+    attr: `NASA GIBS MODIS Terra ${year}`,
+  };
+}
+
 const BASEMAPS = {
   satellite: {
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
@@ -34,7 +60,99 @@ const BASEMAPS = {
       </svg>
     ),
   },
+  historical: {
+    url: null,
+    label: 'ย้อนเวลา',
+    icon: (
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="1 4 1 10 7 10"/>
+        <path d="M3.51 15a9 9 0 1 0 .49-4.09"/>
+      </svg>
+    ),
+  },
 };
+
+
+function HistoryYearPanel({ selectedYear, onSelect }) {
+  const src = getHistSource(selectedYear);
+  const allYears = Array.from(
+    { length: HIST_MAX_YEAR - HIST_MIN_YEAR + 1 },
+    (_, i) => HIST_MAX_YEAR - i
+  );
+
+  return (
+    <div
+      className="absolute right-3 z-[1000] rounded-xl overflow-hidden"
+      style={{
+        bottom: '5.5rem',
+        width: '210px',
+        background: 'rgba(255,255,255,0.97)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        border: '1px solid rgba(0,0,0,0.1)',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.18)',
+      }}
+    >
+      {/* Header + ดาวเทียมที่กำลังใช้ */}
+      <div className="px-3 pt-2.5 pb-2 border-b border-black/[0.06]">
+        <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1">
+          ภาพย้อนหลัง (2000–2026)
+        </p>
+        <div className="flex items-center gap-1.5">
+          <span
+            className="text-[10px] font-semibold px-1.5 py-0.5 rounded"
+            style={{
+              background: src.satellite.startsWith('Sentinel') ? 'rgba(99,102,241,0.12)' : 'rgba(239,68,68,0.1)',
+              color: src.satellite.startsWith('Sentinel') ? '#4f46e5' : '#dc2626',
+            }}
+          >
+            {src.satellite}
+          </span>
+          <span className="text-[10px] text-slate-400">{src.resolution}/pixel</span>
+        </div>
+      </div>
+
+      {/* ตำแหน่งปี */}
+      <div
+        className="px-3 py-2 grid grid-cols-4 gap-1"
+        style={{ maxHeight: '180px', overflowY: 'auto', scrollbarWidth: 'thin' }}
+      >
+        {allYears.map((y) => {
+          const isS2 = y >= 2016;
+          const active = selectedYear === y;
+          return (
+            <button
+              key={y}
+              onClick={() => onSelect(y)}
+              className="py-1 rounded-md text-[11px] font-semibold transition-all"
+              style={{
+                background: active
+                  ? (isS2 ? '#6366f1' : '#ef4444')
+                  : 'rgba(0,0,0,0.04)',
+                color: active ? '#fff' : '#374151',
+                border: `1px solid ${active ? (isS2 ? '#6366f1' : '#ef4444') : 'rgba(0,0,0,0.06)'}`,
+              }}
+            >
+              {y}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Legend */}
+      <div className="px-3 pb-2.5 flex items-center gap-3">
+        <div className="flex items-center gap-1">
+          <span className="w-2.5 h-2.5 rounded-sm" style={{ background: '#6366f1' }} />
+          <span className="text-[10px] text-slate-500">Sentinel-2</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="w-2.5 h-2.5 rounded-sm" style={{ background: '#ef4444' }} />
+          <span className="text-[10px] text-slate-500">MODIS Terra</span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function BoundsLocker() {
   const map = useMap();
@@ -66,11 +184,24 @@ function FlyToHandler({ target }) {
 
 export default function MapView({ activeLayers, tambons, selectedDistrict, onDistrictClick, onMapClick, forecastDatetime, layerSettings, selectedMonth, flyToTarget }) {
   const [basemap, setBasemap] = useState('satellite');
+  const [historyYear, setHistoryYear] = useState(2026);
 
   const selectedId = selectedDistrict?.id;
   const s = (id) => layerSettings?.[id] ?? { visible: true, opacity: 0.75 };
   const has = (id) => activeLayers?.has(id) ?? false;
-  const bm = BASEMAPS[basemap];
+
+  const histSrc = getHistSource(historyYear);
+
+  const tileUrl = basemap === 'satellite' ? BASEMAPS.satellite.url
+    : basemap === 'street' ? BASEMAPS.street.url
+    : histSrc.url;
+
+  const tileAttr = basemap === 'satellite' ? BASEMAPS.satellite.attribution
+    : basemap === 'street' ? BASEMAPS.street.attribution
+    : histSrc.attr;
+
+  const tileKey = basemap === 'historical' ? `hist-${historyYear}` : basemap;
+  const nativeZoom = basemap === 'historical' ? histSrc.maxNativeZoom : 19;
 
   return (
     <div className="relative w-full h-full">
@@ -86,10 +217,11 @@ export default function MapView({ activeLayers, tambons, selectedDistrict, onDis
         className="z-0"
       >
         <TileLayer
-          key={basemap}
-          url={bm.url}
-          attribution={bm.attribution}
+          key={tileKey}
+          url={tileUrl}
+          attribution={tileAttr}
           maxZoom={19}
+          maxNativeZoom={nativeZoom}
         />
 
         <BoundsLocker />
@@ -106,48 +238,32 @@ export default function MapView({ activeLayers, tambons, selectedDistrict, onDis
         {has('temperature') && s('temperature').visible && forecastDatetime && (
           <TMDTempTileLayer datetime={forecastDatetime} opacity={s('temperature').opacity} />
         )}
-
         {has('temperature') && s('temperature').visible && (
-          <TemperatureLayer
-            districts={tambons}
-            onDistrictClick={onDistrictClick}
-            selectedId={selectedId}
-            opacity={s('temperature').opacity}
-          />
+          <TemperatureLayer districts={tambons} onDistrictClick={onDistrictClick} selectedId={selectedId} opacity={s('temperature').opacity} />
         )}
-
         {has('pm25') && s('pm25').visible && (
-          <PM25Layer
-            districts={tambons}
-            onDistrictClick={onDistrictClick}
-            selectedId={selectedId}
-            opacity={s('pm25').opacity}
-          />
+          <PM25Layer districts={tambons} onDistrictClick={onDistrictClick} selectedId={selectedId} opacity={s('pm25').opacity} />
         )}
-
         {has('heat') && s('heat').visible && (
-          <HeatAccumulationLayer
-            districts={tambons}
-            onDistrictClick={onDistrictClick}
-            selectedId={selectedId}
-            opacity={s('heat').opacity}
-          />
+          <HeatAccumulationLayer districts={tambons} onDistrictClick={onDistrictClick} selectedId={selectedId} opacity={s('heat').opacity} />
         )}
-
         {has('stream') && s('stream').visible && (
           <StreamLayer opacity={s('stream').opacity} />
         )}
-
         {has('monthly_temp') && s('monthly_temp').visible && selectedMonth && (
           <NASATempMonthlyLayer month={selectedMonth} opacity={s('monthly_temp').opacity} />
         )}
-
         {has('hotspot') && s('hotspot').visible && (
           <HotspotLayer hotspots={hotspots} opacity={s('hotspot').opacity} />
         )}
       </MapContainer>
 
-      {/* Basemap toggle — bottom right, above zoom control */}
+      {/* Year panel ภาพย้อนหลัง */}
+      {basemap === 'historical' && (
+        <HistoryYearPanel selectedYear={historyYear} onSelect={setHistoryYear} />
+      )}
+
+      {/* Basemap toggle */}
       <div
         className="absolute bottom-6 right-3 z-[1000] flex rounded-xl overflow-hidden"
         style={{
