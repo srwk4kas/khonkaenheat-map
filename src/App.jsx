@@ -4,9 +4,12 @@ import Sidebar from './components/Sidebar';
 import ChatBot from './components/ChatBot';
 import ForecastTimePicker, { toApiStr } from './components/ForecastTimePicker';
 import MonthPicker from './components/MonthPicker';
+import { useRealtimeWeather } from './hooks/useRealtimeWeather';
 
 export default function App() {
-  const [activeLayer, setActiveLayer] = useState('temperature');
+  const { tambons, status: weatherStatus, lastUpdated, refresh: refreshWeather } = useRealtimeWeather();
+  const [activeLayers, setActiveLayers] = useState(new Set(['temperature']));
+  const [infoLayer, setInfoLayer] = useState('temperature');
   const [selectedDistrict, setSelectedDistrict] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -16,6 +19,7 @@ export default function App() {
     heat:         { visible: true, opacity: 0.78 },
     stream:       { visible: true, opacity: 0.85 },
     monthly_temp: { visible: true, opacity: 0.80 },
+    hotspot:      { visible: true, opacity: 0.90 },
   });
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const now = new Date();
@@ -29,6 +33,19 @@ export default function App() {
     const h = Math.floor(now.getUTCHours() / 3) * 3;
     return toApiStr(new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), h)));
   });
+
+  const handleLayerToggle = useCallback((id) => {
+    setActiveLayers(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+    setInfoLayer(id);
+  }, []);
 
   const handleMapClick = useCallback(() => {
     setSelectedDistrict(null);
@@ -44,7 +61,8 @@ export default function App() {
   return (
     <div className="relative w-full h-screen overflow-hidden bg-slate-950">
       <MapView
-        activeLayer={activeLayer}
+        activeLayers={activeLayers}
+        tambons={tambons}
         selectedDistrict={selectedDistrict}
         onDistrictClick={handleDistrictSelect}
         onMapClick={handleMapClick}
@@ -53,8 +71,13 @@ export default function App() {
         selectedMonth={selectedMonth}
       />
       <Sidebar
-        activeLayer={activeLayer}
-        onLayerChange={setActiveLayer}
+        activeLayers={activeLayers}
+        infoLayer={infoLayer}
+        onLayerToggle={handleLayerToggle}
+        tambons={tambons}
+        weatherStatus={weatherStatus}
+        lastUpdated={lastUpdated}
+        onRefreshWeather={refreshWeather}
         selectedDistrict={selectedDistrict}
         onDistrictSelect={handleDistrictSelect}
         searchQuery={searchQuery}
@@ -64,14 +87,14 @@ export default function App() {
         layerSettings={layerSettings}
         onLayerSettingChange={updateLayerSetting}
       />
-      {activeLayer === 'temperature' && (
+      {activeLayers.has('temperature') && (
         <ForecastTimePicker
           datetime={forecastDatetime}
           onChange={setForecastDatetime}
           sidebarOpen={sidebarOpen}
         />
       )}
-      {activeLayer === 'monthly_temp' && (
+      {activeLayers.has('monthly_temp') && (
         <MonthPicker
           selectedMonth={selectedMonth}
           onChange={setSelectedMonth}
