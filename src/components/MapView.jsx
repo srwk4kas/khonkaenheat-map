@@ -59,8 +59,8 @@ function FlyToHandler({ target }) {
   const map = useMap();
   useEffect(() => {
     if (!target) return;
-    map.flyTo([target.lat, target.lng], 14, { animate: true, duration: 1.2 });
-  }, [map, target?.ts]); // ts เปลี่ยนทุกครั้งที่เลือกตำบลใหม่
+    map.flyTo([target.lat, target.lng], target.zoom ?? 14, { animate: true, duration: 1.2 });
+  }, [map, target?.ts]);
   return null;
 }
 

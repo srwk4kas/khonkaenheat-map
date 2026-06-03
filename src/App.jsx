@@ -5,6 +5,7 @@ import ChatBot from './components/ChatBot';
 import ForecastTimePicker, { toApiStr } from './components/ForecastTimePicker';
 import MonthPicker from './components/MonthPicker';
 import { useRealtimeWeather } from './hooks/useRealtimeWeather';
+import { KK_CENTER, KK_DEFAULT_ZOOM } from './data/mockData';
 
 export default function App() {
   const { tambons, status: weatherStatus, lastUpdated, refresh: refreshWeather } = useRealtimeWeather();
@@ -51,6 +52,10 @@ export default function App() {
 
   const handleFlyTo = useCallback(({ lat, lng }) => {
     setFlyToTarget({ lat, lng, ts: Date.now() });
+  }, []);
+
+  const handleResetView = useCallback(() => {
+    setFlyToTarget({ lat: KK_CENTER[0], lng: KK_CENTER[1], zoom: KK_DEFAULT_ZOOM, ts: Date.now() });
   }, []);
 
   const handleMapClick = useCallback(() => {
@@ -111,6 +116,37 @@ export default function App() {
         />
       )}
       <ChatBot />
+
+      {/* ปุ่มแบบจำลองการเกิดเกาะความร้อน — fixed top-right */}
+      <a
+        href="https://air-sim.vercel.app/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed top-4 right-4 z-[1001] flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-200 hover:scale-105"
+        style={{
+          background: 'rgba(255,255,255,0.96)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          border: '1px solid rgba(239,68,68,0.3)',
+          boxShadow: '0 4px 16px rgba(239,68,68,0.15)',
+        }}
+      >
+        <div
+          className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0"
+          style={{ background: 'linear-gradient(135deg, #ef4444, #f97316)' }}
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
+            <path d="M12 2c0 0-6 6-6 12a6 6 0 0 0 12 0c0-6-6-12-6-12zm0 16a4 4 0 0 1-4-4c0-2.5 2-5.5 4-8 2 2.5 4 5.5 4 8a4 4 0 0 1-4 4z"/>
+          </svg>
+        </div>
+        <span className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+          แบบจำลองการเกิดเกาะความร้อน
+        </span>
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+          <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+        </svg>
+      </a>
     </div>
   );
 }
