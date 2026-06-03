@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import {
   FaThermometerHalf,
   FaWind,
@@ -317,6 +317,7 @@ export default function Sidebar({
   weatherStatus,
   lastUpdated,
   onRefreshWeather,
+  onFlyTo,
   selectedDistrict,
   onDistrictSelect,
   searchQuery,
@@ -327,6 +328,8 @@ export default function Sidebar({
   onLayerSettingChange,
 }) {
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [externalResults, setExternalResults] = useState([]);
+  const [externalLoading, setExternalLoading] = useState(false);
   const searchRef = useRef(null);
 
   const filtered = searchQuery.trim()
@@ -335,6 +338,31 @@ export default function Sidebar({
         `ตำบล${d.name}`.includes(searchQuery)
       )
     : [];
+
+  // Nominatim geocoding — ค้นหาทั่วประเทศไทย
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (!q || q.length < 2) {
+      setExternalResults([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setExternalLoading(true);
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&countrycodes=th&limit=5&accept-language=th`,
+          { headers: { 'User-Agent': 'KKMapHeat/1.0' } }
+        );
+        const data = await res.json();
+        setExternalResults(data);
+      } catch {
+        setExternalResults([]);
+      } finally {
+        setExternalLoading(false);
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   useEffect(() => {
     const handleClick = (e) => {
@@ -350,7 +378,16 @@ export default function Sidebar({
     onDistrictSelect(district);
     onSearchChange(district.name);
     setShowSuggestions(false);
+    setExternalResults([]);
   };
+
+  const handleExternalClick = useCallback((place) => {
+    const label = place.display_name.split(',')[0].trim();
+    onFlyTo({ lat: parseFloat(place.lat), lng: parseFloat(place.lon) });
+    onSearchChange(label);
+    setShowSuggestions(false);
+    setExternalResults([]);
+  }, [onFlyTo, onSearchChange]);
 
   const currentLayer = LAYER_BUTTONS.find((l) => l.id === infoLayer);
 
@@ -435,7 +472,7 @@ export default function Sidebar({
                   setShowSuggestions(true);
                 }}
                 onFocus={() => setShowSuggestions(true)}
-                placeholder="ค้นหาตำบล เช่น ในเมือง, ดอนช้าง..."
+                placeholder="ค้นหาตำบล หรือสถานที่ทั่วไทย..."
                 className="w-full pl-9 pr-9 py-2.5 text-sm rounded-xl text-slate-800 placeholder-slate-400 outline-none transition-all"
                 style={{
                   background: 'rgba(0,0,0,0.04)',
@@ -446,12 +483,13 @@ export default function Sidebar({
                   if (e.key === 'Escape') {
                     setShowSuggestions(false);
                     onSearchChange('');
+                    setExternalResults([]);
                   }
                 }}
               />
               {searchQuery && (
                 <button
-                  onClick={() => { onSearchChange(''); setShowSuggestions(false); }}
+                  onClick={() => { onSearchChange(''); setShowSuggestions(false); setExternalResults([]); }}
                   className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 transition-colors"
                 >
                   <FaTimes size={10} />
@@ -460,7 +498,7 @@ export default function Sidebar({
             </div>
 
             {/* Suggestions dropdown */}
-            {showSuggestions && filtered.length > 0 && (
+            {showSuggestions && (filtered.length > 0 || externalLoading || externalResults.length > 0) && (
               <div
                 className="absolute left-0 right-0 top-full mt-1.5 rounded-xl overflow-hidden z-50 animate-fade-in"
                 style={{
@@ -468,23 +506,74 @@ export default function Sidebar({
                   border: '1px solid rgba(0,0,0,0.1)',
                   boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
                   backdropFilter: 'blur(16px)',
+                  maxHeight: '320px',
+                  overflowY: 'auto',
                 }}
               >
-                {filtered.slice(0, 6).map((d) => (
-                  <button
-                    key={d.id}
-                    onClick={() => handleSuggestionClick(d)}
-                    className="w-full flex items-center gap-3 px-3.5 py-2.5 text-left hover:bg-black/5 transition-colors"
-                  >
-                    <FaMapMarkerAlt className="text-indigo-500 flex-shrink-0" size={11} />
-                    <div className="min-w-0">
-                      <p className="text-sm text-slate-800">ต.{d.name}</p>
-                      <p className="text-xs text-slate-500 truncate">
-                        อุณหภูมิ {d.temperature}°C · PM2.5 {d.pm25} AQI
-                      </p>
+                {/* ผลลัพธ์ตำบลในอ.เมืองขอนแก่น */}
+                {filtered.length > 0 && (
+                  <>
+                    <div className="px-3.5 pt-2.5 pb-1">
+                      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
+                        ตำบลในอ.เมืองขอนแก่น
+                      </span>
                     </div>
-                  </button>
-                ))}
+                    {filtered.slice(0, 5).map((d) => (
+                      <button
+                        key={d.id}
+                        onClick={() => handleSuggestionClick(d)}
+                        className="w-full flex items-center gap-3 px-3.5 py-2.5 text-left hover:bg-black/5 transition-colors"
+                      >
+                        <FaMapMarkerAlt className="text-indigo-500 flex-shrink-0" size={11} />
+                        <div className="min-w-0">
+                          <p className="text-sm text-slate-800">ต.{d.name}</p>
+                          <p className="text-xs text-slate-500 truncate">
+                            {d.temperature}°C · PM2.5 {d.pm25} µg/m³
+                          </p>
+                        </div>
+                      </button>
+                    ))}
+                  </>
+                )}
+
+                {/* Divider */}
+                {filtered.length > 0 && (externalLoading || externalResults.length > 0) && (
+                  <div style={{ height: '1px', background: 'rgba(0,0,0,0.06)', margin: '4px 0' }} />
+                )}
+
+                {/* ผลลัพธ์ทั่วประเทศไทย (Nominatim) */}
+                {externalLoading ? (
+                  <div className="px-3.5 py-3 flex items-center gap-2 text-xs text-slate-400">
+                    <div className="w-3 h-3 border border-slate-300 border-t-indigo-500 rounded-full animate-spin" />
+                    กำลังค้นหา...
+                  </div>
+                ) : externalResults.length > 0 && (
+                  <>
+                    <div className="px-3.5 pt-2.5 pb-1">
+                      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
+                        สถานที่ในประเทศไทย
+                      </span>
+                    </div>
+                    {externalResults.map((place) => {
+                      const parts = place.display_name.split(',');
+                      const primary = parts[0].trim();
+                      const secondary = parts.slice(1, 3).join(',').trim();
+                      return (
+                        <button
+                          key={place.place_id}
+                          onClick={() => handleExternalClick(place)}
+                          className="w-full flex items-center gap-3 px-3.5 py-2.5 text-left hover:bg-black/5 transition-colors"
+                        >
+                          <FaSearch className="text-slate-400 flex-shrink-0" size={10} />
+                          <div className="min-w-0">
+                            <p className="text-sm text-slate-800 truncate">{primary}</p>
+                            <p className="text-xs text-slate-400 truncate">{secondary}</p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </>
+                )}
               </div>
             )}
           </div>

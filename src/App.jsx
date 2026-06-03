@@ -47,6 +47,12 @@ export default function App() {
     setInfoLayer(id);
   }, []);
 
+  const [flyToTarget, setFlyToTarget] = useState(null);
+
+  const handleFlyTo = useCallback(({ lat, lng }) => {
+    setFlyToTarget({ lat, lng, ts: Date.now() });
+  }, []);
+
   const handleMapClick = useCallback(() => {
     setSelectedDistrict(null);
   }, []);
@@ -55,6 +61,7 @@ export default function App() {
     setSelectedDistrict(district);
     if (district) {
       setSearchQuery('');
+      setFlyToTarget({ lat: district.lat, lng: district.lng, ts: Date.now() });
     }
   }, []);
 
@@ -69,6 +76,7 @@ export default function App() {
         forecastDatetime={forecastDatetime}
         layerSettings={layerSettings}
         selectedMonth={selectedMonth}
+        flyToTarget={flyToTarget}
       />
       <Sidebar
         activeLayers={activeLayers}
@@ -78,6 +86,7 @@ export default function App() {
         weatherStatus={weatherStatus}
         lastUpdated={lastUpdated}
         onRefreshWeather={refreshWeather}
+        onFlyTo={handleFlyTo}
         selectedDistrict={selectedDistrict}
         onDistrictSelect={handleDistrictSelect}
         searchQuery={searchQuery}
