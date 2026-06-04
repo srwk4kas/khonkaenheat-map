@@ -8,6 +8,7 @@ import TMDTempTileLayer from './layers/TMDTempTileLayer';
 import StreamLayer from './layers/StreamLayer';
 import NASATempMonthlyLayer from './layers/NASATempMonthlyLayer';
 import HotspotLayer from './layers/HotspotLayer';
+import Map3DView from './Map3DView';
 import 'leaflet/dist/leaflet.css';
 
 // ข้อมูลแหล่งดาวเทียมแต่ละปี (2000–2024)
@@ -196,6 +197,7 @@ function FlyToHandler({ target }) {
 export default function MapView({ activeLayers, tambons, selectedDistrict, onDistrictClick, onMapClick, forecastDatetime, layerSettings, selectedMonth, flyToTarget }) {
   const [basemap, setBasemap] = useState('satellite');
   const [historyYear, setHistoryYear] = useState(2026);
+  const [show3D, setShow3D] = useState(false);
 
   const selectedId = selectedDistrict?.id;
   const s = (id) => layerSettings?.[id] ?? { visible: true, opacity: 0.75 };
@@ -213,6 +215,10 @@ export default function MapView({ activeLayers, tambons, selectedDistrict, onDis
 
   const tileKey = basemap === 'historical' ? `hist-${historyYear}` : basemap;
   const nativeZoom = basemap === 'historical' ? histSrc.maxNativeZoom : 19;
+
+  if (show3D) {
+    return <Map3DView onClose={() => setShow3D(false)} />;
+  }
 
   return (
     <div className="relative w-full h-full">
@@ -275,31 +281,53 @@ export default function MapView({ activeLayers, tambons, selectedDistrict, onDis
       )}
 
       {/* Basemap toggle */}
-      <div
-        className="absolute bottom-6 right-3 z-[1000] flex rounded-xl overflow-hidden"
-        style={{
-          background: 'rgba(255,255,255,0.96)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-          border: '1px solid rgba(0,0,0,0.1)',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
-        }}
-      >
-        {Object.entries(BASEMAPS).map(([key, meta], i, arr) => (
-          <button
-            key={key}
-            onClick={() => setBasemap(key)}
-            className="flex flex-col items-center gap-1 px-3.5 py-2.5 text-[11px] font-medium transition-all duration-200"
-            style={{
-              background: basemap === key ? 'rgba(99,102,241,0.1)' : 'transparent',
-              color: basemap === key ? '#4f46e5' : '#94a3b8',
-              borderRight: i < arr.length - 1 ? '1px solid rgba(0,0,0,0.07)' : 'none',
-            }}
-          >
-            <span style={{ color: basemap === key ? '#4f46e5' : '#94a3b8' }}>{meta.icon}</span>
-            {meta.label}
-          </button>
-        ))}
+      <div className="absolute bottom-6 right-3 z-[1000] flex flex-col items-end gap-2">
+        {/* 3D button */}
+        <button
+          onClick={() => setShow3D(true)}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-bold transition-all duration-200"
+          style={{
+            background: 'rgba(15,23,42,0.9)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            color: '#a5b4fc',
+            border: '1px solid rgba(99,102,241,0.4)',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+          </svg>
+          3D
+        </button>
+
+        {/* Basemap row */}
+        <div
+          className="flex rounded-xl overflow-hidden"
+          style={{
+            background: 'rgba(255,255,255,0.96)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            border: '1px solid rgba(0,0,0,0.1)',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
+          }}
+        >
+          {Object.entries(BASEMAPS).map(([key, meta], i, arr) => (
+            <button
+              key={key}
+              onClick={() => setBasemap(key)}
+              className="flex flex-col items-center gap-1 px-3.5 py-2.5 text-[11px] font-medium transition-all duration-200"
+              style={{
+                background: basemap === key ? 'rgba(99,102,241,0.1)' : 'transparent',
+                color: basemap === key ? '#4f46e5' : '#94a3b8',
+                borderRight: i < arr.length - 1 ? '1px solid rgba(0,0,0,0.07)' : 'none',
+              }}
+            >
+              <span style={{ color: basemap === key ? '#4f46e5' : '#94a3b8' }}>{meta.icon}</span>
+              {meta.label}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
