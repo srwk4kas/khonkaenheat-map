@@ -1,5 +1,13 @@
-import { FaWind, FaTint, FaMapMarkerAlt, FaThermometerHalf } from 'react-icons/fa';
+import { FaWind, FaTint, FaMapMarkerAlt, FaThermometerHalf, FaSun } from 'react-icons/fa';
 import { getTemperatureColor, getPM25Color, getPM25Level } from '../data/mockData';
+
+function getUVLevel(uv) {
+  if (uv <= 2)  return { label: 'ต่ำ',        color: '#22c55e' };
+  if (uv <= 5)  return { label: 'ปานกลาง',    color: '#eab308' };
+  if (uv <= 7)  return { label: 'สูง',         color: '#f97316' };
+  if (uv <= 10) return { label: 'สูงมาก',     color: '#ef4444' };
+  return               { label: 'อันตราย',   color: '#7c3aed' };
+}
 
 const DAY_TH   = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
 const MONTH_TH = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
@@ -70,47 +78,62 @@ function ForecastStrip({ forecast }) {
       <div className="px-4 pb-2 flex items-center gap-3 text-[9px] text-slate-400">
         <span className="flex items-center gap-0.5"><FaThermometerHalf size={8} className="text-orange-300" /> อุณหภูมิ</span>
         <span className="flex items-center gap-0.5"><FaWind size={8} className="text-green-400" /> PM2.5</span>
-        <span className="flex items-center gap-0.5"><FaTint size={8} className="text-blue-400" /> ความชื้น</span>
-        <span>· ลม</span>
+        <span className="flex items-center gap-0.5"><FaTint size={8} className="text-blue-400" /> ชื้น</span>
+        <span className="flex items-center gap-0.5"><FaSun size={8} className="text-yellow-400" /> UV</span>
+        <span className="text-slate-300">· ลม</span>
       </div>
 
       {/* Scrollable cards */}
       <div className="flex gap-2 overflow-x-auto px-4 pb-4"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
         {forecast.map((h) => {
-          const tc = getTemperatureColor(h.temperature);
-          const pc = getPM25Color(h.pm25);
+          const tc  = getTemperatureColor(h.temperature);
+          const pc  = getPM25Color(h.pm25);
+          const uvc = getUVLevel(h.uvIndex ?? 0).color;
+          const dim = h.isCurrent ? '#bfdbfe' : null;
           return (
             <div key={h.time}
-              className="flex-shrink-0 rounded-2xl flex flex-col items-center gap-1.5 pt-2.5 pb-2 px-1.5"
+              className="flex-shrink-0 rounded-2xl flex flex-col items-center gap-1.5 pt-2.5 pb-2.5 px-2"
               style={{
-                width: '64px',
+                width: '70px',
                 background: h.isCurrent ? 'linear-gradient(160deg,#3b82f6,#1d4ed8)' : '#f8faff',
                 border:     h.isCurrent ? '1.5px solid #2563eb' : '1px solid #e8f0ff',
                 boxShadow:  h.isCurrent ? '0 4px 16px rgba(59,130,246,0.28)' : 'none',
               }}>
               {h.dateLabel && (
-                <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-full leading-none"
+                <span className="text-[7px] font-bold px-1.5 py-0.5 rounded-full leading-none"
                   style={{ background: h.isCurrent ? 'rgba(255,255,255,0.2)' : '#dbeafe', color: h.isCurrent ? 'white' : '#3b82f6' }}>
                   วันถัดไป
                 </span>
               )}
-              <span className="text-[11px] font-bold leading-none" style={{ color: h.isCurrent ? '#bfdbfe' : '#94a3b8' }}>
+
+              {/* Time */}
+              <span className="text-[11px] font-bold leading-none" style={{ color: dim ?? '#94a3b8' }}>
                 {String(h.hour).padStart(2,'0')}:00
               </span>
-              <span className="text-[15px] font-black leading-none" style={{ color: h.isCurrent ? 'white' : tc }}>
+
+              {/* Temperature */}
+              <span className="text-[16px] font-black leading-none" style={{ color: h.isCurrent ? 'white' : tc }}>
                 {h.temperature}°
               </span>
+
               <div className="w-full h-px" style={{ background: h.isCurrent ? 'rgba(255,255,255,0.2)' : '#e0eaff' }} />
-              <span className="text-[9px] font-semibold leading-none" style={{ color: h.isCurrent ? '#bfdbfe' : pc }}>
-                {h.pm25}µg
-              </span>
-              <span className="text-[9px] leading-none" style={{ color: h.isCurrent ? '#bfdbfe' : '#60a5fa' }}>
-                {h.humidity}%
-              </span>
-              <span className="text-[9px] leading-none" style={{ color: h.isCurrent ? '#bfdbfe' : '#94a3b8' }}>
-                {h.windSpeed}km
-              </span>
+
+              {/* 2×2 grid: PM2.5 | UV / Humidity | Wind */}
+              <div className="grid grid-cols-2 gap-x-1 gap-y-0.5 w-full text-center">
+                <span className="text-[8.5px] font-semibold leading-none" style={{ color: dim ?? pc }}>
+                  {h.pm25}µg
+                </span>
+                <span className="text-[8.5px] font-semibold leading-none" style={{ color: dim ?? uvc }}>
+                  UV{h.uvIndex}
+                </span>
+                <span className="text-[8.5px] leading-none" style={{ color: dim ?? '#60a5fa' }}>
+                  {h.humidity}%
+                </span>
+                <span className="text-[8.5px] leading-none" style={{ color: dim ?? '#94a3b8' }}>
+                  {h.windSpeed}k
+                </span>
+              </div>
             </div>
           );
         })}
@@ -150,6 +173,8 @@ export default function HomeView({ tambons, forecast, weatherStatus, lastUpdated
   const pm25Level   = getPM25Level(parseFloat(avgPM25));
   const pm25Color   = getPM25Color(parseFloat(avgPM25));
   const tempPct     = Math.max(0, Math.min(100, ((parseFloat(avgTemp) - minTemp) / (maxTemp - minTemp || 1)) * 100));
+  const currentUV   = forecast?.[0]?.uvIndex ?? null;
+  const uvLevel     = currentUV !== null ? getUVLevel(currentUV) : null;
 
   return (
     <div className="absolute top-0 right-0 bottom-0 overflow-y-auto"
@@ -208,8 +233,8 @@ export default function HomeView({ tambons, forecast, weatherStatus, lastUpdated
               </div>
             </div>
 
-            {/* 3 stat cards */}
-            <div className="grid grid-cols-3 gap-2 md:gap-3">
+            {/* 4 stat cards: PM2.5 / UV / Humidity / Wind */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
               {/* PM2.5 */}
               <div className="rounded-2xl md:rounded-3xl p-2.5 md:p-3 bg-white flex flex-col items-center gap-1"
                 style={{ border: `1.5px solid ${pm25Color}30`, boxShadow: `0 4px 16px ${pm25Color}12` }}>
@@ -249,6 +274,31 @@ export default function HomeView({ tambons, forecast, weatherStatus, lastUpdated
                 <p className="text-base md:text-lg font-black text-slate-800 leading-none">{avgWind}</p>
                 <p className="text-[8px] md:text-[9px] text-slate-400 leading-none">km/h</p>
               </div>
+
+              {/* UV Index */}
+              {uvLevel ? (
+                <div className="rounded-2xl md:rounded-3xl p-2.5 md:p-3 bg-white flex flex-col items-center gap-1"
+                  style={{ border: `1.5px solid ${uvLevel.color}30`, boxShadow: `0 4px 16px ${uvLevel.color}12` }}>
+                  <div className="w-8 h-8 md:w-9 md:h-9 rounded-xl md:rounded-2xl flex items-center justify-center"
+                    style={{ background: `${uvLevel.color}15` }}>
+                    <FaSun style={{ color: uvLevel.color }} size={14} />
+                  </div>
+                  <p className="text-[9px] md:text-[10px] text-slate-400 leading-none">UV Index</p>
+                  <p className="text-base md:text-lg font-black text-slate-800 leading-none">{currentUV}</p>
+                  <p className="text-[8px] md:text-[9px] leading-none" style={{ color: uvLevel.color }}>index</p>
+                  <span className="text-[8px] md:text-[9px] font-bold px-1.5 py-0.5 rounded-full"
+                    style={{ background: `${uvLevel.color}15`, color: uvLevel.color }}>{uvLevel.label}</span>
+                </div>
+              ) : (
+                <div className="rounded-2xl md:rounded-3xl p-2.5 md:p-3 bg-white flex flex-col items-center gap-1"
+                  style={{ border: '1.5px solid #e0eaff' }}>
+                  <div className="w-8 h-8 md:w-9 md:h-9 rounded-xl md:rounded-2xl flex items-center justify-center" style={{ background: '#fefce8' }}>
+                    <FaSun className="text-yellow-300" size={14} />
+                  </div>
+                  <p className="text-[9px] md:text-[10px] text-slate-400 leading-none">UV Index</p>
+                  <p className="text-xs text-blue-300 animate-pulse leading-none mt-1">กำลังโหลด</p>
+                </div>
+              )}
             </div>
           </div>
 

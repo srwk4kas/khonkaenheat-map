@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, useMap } from 'react-leaflet';
-import { KK_CENTER, KK_BOUNDS, KK_DEFAULT_ZOOM, THAILAND_BOUNDS, hotspots } from '../data/mockData';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import { KK_CENTER, KK_BOUNDS, KK_DEFAULT_ZOOM, THAILAND_BOUNDS, hotspots, getTemperatureColor } from '../data/mockData';
 import TemperatureLayer from './layers/TemperatureLayer';
 import PM25Layer from './layers/PM25Layer';
 import HeatAccumulationLayer from './layers/HeatAccumulationLayer';
@@ -176,13 +177,92 @@ function BoundsLocker() {
   return null;
 }
 
-function MapClickHandler({ onMapClick }) {
+function MapClickHandler({ onMapClick, onPointClick }) {
   const map = useMap();
   useEffect(() => {
-    map.on('click', onMapClick);
-    return () => map.off('click', onMapClick);
-  }, [map, onMapClick]);
+    const fn = (e) => {
+      onMapClick();
+      onPointClick(e.latlng.lat, e.latlng.lng);
+    };
+    map.on('click', fn);
+    return () => map.off('click', fn);
+  }, [map, onMapClick, onPointClick]);
   return null;
+}
+
+/* ── Temperature popup at arbitrary clicked point ── */
+function TempPointMarker({ point, onClose }) {
+  const markerRef = useRef(null);
+
+  // Auto-open popup when marker appears on map
+  const onAdd = useCallback((e) => { e.target.openPopup(); }, []);
+
+  if (!point) return null;
+
+  const tc   = point.temp != null ? getTemperatureColor(Math.round(point.temp)) : '#3b82f6';
+  const icon = L.divIcon({
+    className: '',
+    html: `<div style="
+      width:13px;height:13px;border-radius:50%;
+      background:#3b82f6;border:2.5px solid white;
+      box-shadow:0 0 0 5px rgba(59,130,246,0.2),0 2px 10px rgba(59,130,246,0.5);
+    "></div>`,
+    iconSize:   [13, 13],
+    iconAnchor: [6.5, 6.5],
+  });
+
+  return (
+    <Marker
+      ref={markerRef}
+      position={[point.lat, point.lng]}
+      icon={icon}
+      eventHandlers={{ add: onAdd }}
+    >
+      <Popup
+        autoPan={false}
+        closeButton
+        onClose={onClose}
+        offset={[0, -10]}
+        className="temp-point-popup"
+      >
+        <div style={{ fontFamily: 'Noto Sans Thai, Inter, sans-serif', minWidth: '160px', padding: '2px 0' }}>
+          {point.status === 'loading' && (
+            <div style={{ color: '#94a3b8', fontSize: '12px' }}>
+              <div style={{ width: '80px', height: '32px', borderRadius: '6px', background: '#f1f5f9', marginBottom: '6px' }} />
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <div style={{ width: '48px', height: '12px', borderRadius: '4px', background: '#f1f5f9' }} />
+                <div style={{ width: '48px', height: '12px', borderRadius: '4px', background: '#f1f5f9' }} />
+              </div>
+              <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '6px' }}>กำลังโหลด...</div>
+            </div>
+          )}
+
+          {point.status === 'error' && (
+            <div style={{ color: '#ef4444', fontSize: '12px' }}>โหลดข้อมูลไม่สำเร็จ</div>
+          )}
+
+          {point.status === 'ok' && (
+            <>
+              <div style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '4px' }}>
+                🌡️ อุณหภูมิ ณ จุดนี้
+              </div>
+              <div style={{ fontSize: '30px', fontWeight: 900, color: tc, lineHeight: 1.1 }}>
+                {point.temp?.toFixed(1)}
+                <span style={{ fontSize: '15px', fontWeight: 700 }}>°C</span>
+              </div>
+              <div style={{ display: 'flex', gap: '12px', marginTop: '8px', fontSize: '12px', color: '#475569' }}>
+                <span>💧 {point.humidity}%</span>
+                <span>🌬️ {point.wind} km/h</span>
+              </div>
+              <div style={{ fontSize: '9px', color: '#cbd5e1', marginTop: '8px', fontFamily: 'monospace' }}>
+                {point.lat.toFixed(5)}, {point.lng.toFixed(5)}
+              </div>
+            </>
+          )}
+        </div>
+      </Popup>
+    </Marker>
+  );
 }
 
 function FlyToHandler({ target }) {
@@ -198,6 +278,25 @@ export default function MapView({ activeLayers, tambons, selectedDistrict, onDis
   const [basemap, setBasemap] = useState('satellite');
   const [historyYear, setHistoryYear] = useState(2026);
   const [show3D, setShow3D] = useState(false);
+  const [tempPoint, setTempPoint] = useState(null);
+
+  const handlePointClick = useCallback((lat, lng) => {
+    setTempPoint({ lat, lng, status: 'loading' });
+    fetch(
+      `https://api.open-meteo.com/v1/forecast` +
+      `?latitude=${lat.toFixed(6)}&longitude=${lng.toFixed(6)}` +
+      `&current=temperature_2m,relative_humidity_2m,wind_speed_10m` +
+      `&timezone=Asia%2FBangkok&wind_speed_unit=kmh`
+    )
+      .then(r => r.json())
+      .then(d => setTempPoint({
+        lat, lng, status: 'ok',
+        temp:     d.current?.temperature_2m,
+        humidity: d.current?.relative_humidity_2m,
+        wind:     d.current?.wind_speed_10m,
+      }))
+      .catch(() => setTempPoint(p => p ? { ...p, status: 'error' } : null));
+  }, []);
 
   const selectedId = selectedDistrict?.id;
   const s = (id) => layerSettings?.[id] ?? { visible: true, opacity: 0.75 };
@@ -242,8 +341,9 @@ export default function MapView({ activeLayers, tambons, selectedDistrict, onDis
         />
 
         <BoundsLocker />
-        <MapClickHandler onMapClick={onMapClick} />
+        <MapClickHandler onMapClick={onMapClick} onPointClick={handlePointClick} />
         <FlyToHandler target={flyToTarget} />
+        <TempPointMarker point={tempPoint} onClose={() => setTempPoint(null)} />
 
         {/* Zoom control — bottom right */}
         <div className="leaflet-control-container">

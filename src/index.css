@@ -143,6 +143,28 @@ html, body, #root {
   white-space: nowrap;
 }
 
+/* Temperature point popup */
+.temp-point-popup .leaflet-popup-content-wrapper {
+  background: rgba(255,255,255,0.97) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 8px 32px rgba(59,130,246,0.18), 0 2px 8px rgba(0,0,0,0.1) !important;
+  border: 1px solid rgba(219,234,254,0.8) !important;
+  padding: 0 !important;
+}
+.temp-point-popup .leaflet-popup-content {
+  margin: 14px 16px !important;
+}
+.temp-point-popup .leaflet-popup-tip-container {
+  display: none !important;
+}
+.temp-point-popup .leaflet-popup-close-button {
+  color: #94a3b8 !important;
+  font-size: 18px !important;
+  top: 6px !important;
+  right: 8px !important;
+  padding: 0 !important;
+}
+
 /* Hotspot pulsing ring animation */
 @keyframes hotspotRing {
   0%   { transform: scale(1);   opacity: 0.8; }
