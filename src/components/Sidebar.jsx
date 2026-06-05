@@ -301,8 +301,21 @@ export default function Sidebar({
           boxShadow: '4px 0 32px rgba(59,130,246,0.10)',
         }}
       >
-        {/* ── Hero card ── */}
-        <div className="flex-shrink-0 px-4 pt-4 pb-3">
+        {/* ── Mobile: compact 1-line header ── */}
+        <div className="md:hidden flex-shrink-0 px-3 py-2 flex items-center justify-between"
+          style={{ borderBottom: '1px solid #e0eaff' }}>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <FaMapMarkerAlt className="text-blue-400 flex-shrink-0" size={10} />
+            <span className="text-blue-700 text-xs font-bold truncate">แผนที่ขอนแก่น</span>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <LiveBadge status={weatherStatus} lastUpdated={lastUpdated} onRefresh={onRefreshWeather} />
+            <span className="text-blue-900 text-sm font-black ml-1">{avgTemp}°</span>
+          </div>
+        </div>
+
+        {/* ── Desktop: full hero card ── */}
+        <div className="hidden md:block flex-shrink-0 px-4 pt-4 pb-3">
           <div className="rounded-3xl p-4"
             style={{
               background: 'linear-gradient(135deg,#dbeafe 0%,#bfdbfe 55%,#93c5fd 100%)',
@@ -330,10 +343,10 @@ export default function Sidebar({
         </div>
 
         {/* ── Scrollable content ── */}
-        <div className="flex-1 overflow-y-auto px-4 pb-[76px] md:pb-6 space-y-4">
+        <div className="flex-1 overflow-y-auto px-3 md:px-4 pb-[76px] md:pb-6 space-y-2.5 md:space-y-4 pt-2.5 md:pt-0">
 
-          {/* Quick stats */}
-          <div className="grid grid-cols-3 gap-2">
+          {/* Quick stats — desktop only */}
+          <div className="hidden md:grid grid-cols-3 gap-2">
             {[
               { icon: FaWind, label: 'ลม', value: avgWind, unit: 'km/h', color: '#3b82f6' },
               { icon: FaTint, label: 'ความชื้น', value: avgHumidity, unit: '%', color: '#0ea5e9' },
@@ -429,18 +442,19 @@ export default function Sidebar({
                   <div key={btn.id} className="rounded-2xl overflow-hidden bg-white transition-all duration-200"
                     style={{ border: `1.5px solid ${isActive ? btn.activeBorder : '#e0eaff'}`, boxShadow: isActive ? `0 0 16px ${btn.activeBorder}25` : 'none' }}>
                     <button onClick={() => onLayerToggle(btn.id)}
-                      className="w-full flex items-center gap-3 px-3.5 py-3 text-left"
+                      className="w-full flex items-center gap-2.5 px-3 md:px-3.5 py-2 md:py-3 text-left"
                       style={{ background: isActive ? btn.activeBg : 'transparent' }}>
-                      <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
+                      <div className="w-7 h-7 md:w-8 md:h-8 rounded-xl flex items-center justify-center flex-shrink-0"
                         style={{ background: isActive ? `${btn.iconColor}18` : '#f0f7ff' }}>
-                        <Icon size={13} style={{ color: isActive ? btn.iconColor : '#93c5fd' }} />
+                        <Icon size={12} style={{ color: isActive ? btn.iconColor : '#93c5fd' }} />
                       </div>
-                      <span className="text-sm font-medium flex-1" style={{ color: isActive ? '#1e293b' : '#94a3b8' }}>{btn.label}</span>
+                      <span className="text-xs md:text-sm font-medium flex-1" style={{ color: isActive ? '#1e293b' : '#94a3b8' }}>{btn.label}</span>
                       <div className="w-8 h-4 rounded-full flex-shrink-0 relative transition-all" style={{ background: isActive ? btn.iconColor : '#e0eaff' }}>
                         <div className="absolute top-0.5 w-3 h-3 rounded-full bg-white shadow transition-all" style={{ left: isActive ? '17px' : '2px' }} />
                       </div>
                     </button>
 
+                    {/* Mini stats — desktop only */}
                     {isActive && (btn.id === 'temperature' || btn.id === 'pm25') && tambons.length > 0 && (() => {
                       const field = btn.id === 'temperature' ? 'temperature' : 'pm25';
                       const unit  = btn.id === 'temperature' ? '°C' : ' µg';
@@ -448,7 +462,7 @@ export default function Sidebar({
                       const vals  = tambons.map(d => d[field]);
                       const avg   = (vals.reduce((s,v)=>s+v,0)/vals.length).toFixed(dec);
                       return (
-                        <div className="grid grid-cols-3 divide-x divide-blue-50 text-center"
+                        <div className="hidden md:grid grid-cols-3 divide-x divide-blue-50 text-center"
                           style={{ background: `${btn.iconColor}06`, borderTop: `1px solid ${btn.activeBorder}` }}>
                           {[['ต่ำสุด',`${Math.min(...vals).toFixed(dec)}${unit}`,'#3b82f6'],['เฉลี่ย',`${avg}${unit}`,'#f97316'],['สูงสุด',`${Math.max(...vals).toFixed(dec)}${unit}`,'#ef4444']].map(([lbl,val,clr])=>(
                             <div key={lbl} className="py-1.5">
@@ -460,8 +474,9 @@ export default function Sidebar({
                       );
                     })()}
 
+                    {/* Opacity controls — desktop only */}
                     {isActive && (
-                      <div className="flex items-center gap-2.5 px-3.5 py-2"
+                      <div className="hidden md:flex items-center gap-2.5 px-3.5 py-2"
                         style={{ background: `${btn.iconColor}06`, borderTop: `1px solid ${btn.activeBorder}` }}>
                         <button onClick={() => onLayerSettingChange(btn.id,'visible',!settings.visible)}
                           className="shrink-0 p-1 rounded-lg hover:bg-black/5 transition-colors">
@@ -485,16 +500,16 @@ export default function Sidebar({
 
           {/* Info card */}
           <div>
-            <label className="block text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-2">
+            <label className="block text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-1.5">
               {selectedDistrict ? 'ข้อมูลพื้นที่' : 'ข้อมูลเลเยอร์'}
             </label>
-            <div className="rounded-3xl p-4 bg-white" style={{ border: '1px solid #e0eaff' }}>
+            <div className="rounded-2xl md:rounded-3xl p-3 md:p-4 bg-white" style={{ border: '1px solid #e0eaff' }}>
               <InfoCard selectedDistrict={selectedDistrict} activeLayer={infoLayer} onClear={() => onDistrictSelect(null)} tambons={tambons} />
             </div>
           </div>
 
-          {/* Province summary */}
-          <div>
+          {/* Province summary — desktop only */}
+          <div className="hidden md:block">
             <label className="block text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-2">ภาพรวม</label>
             <div className="grid grid-cols-2 gap-2">
               {[
