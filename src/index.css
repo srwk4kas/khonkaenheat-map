@@ -26,14 +26,14 @@ html, body, #root {
 
 .leaflet-control-zoom {
   border: none !important;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.3) !important;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.2) !important;
 }
 
 .leaflet-control-zoom a {
-  background: rgba(15, 23, 42, 0.85) !important;
+  background: rgba(255,255,255,0.95) !important;
   backdrop-filter: blur(12px);
-  color: #e2e8f0 !important;
-  border: 1px solid rgba(255,255,255,0.1) !important;
+  color: #3b82f6 !important;
+  border: 1px solid #e0eaff !important;
   width: 36px !important;
   height: 36px !important;
   line-height: 36px !important;
@@ -42,23 +42,23 @@ html, body, #root {
 }
 
 .leaflet-control-zoom a:hover {
-  background: rgba(30, 41, 59, 0.95) !important;
-  color: #fff !important;
+  background: #eff6ff !important;
+  color: #2563eb !important;
 }
 
 .leaflet-control-attribution {
-  background: rgba(15, 23, 42, 0.7) !important;
+  background: rgba(255,255,255,0.85) !important;
   backdrop-filter: blur(8px);
   color: #94a3b8 !important;
-  border-top: 1px solid rgba(255,255,255,0.05) !important;
+  border-top: 1px solid #e0eaff !important;
   font-size: 10px !important;
 }
 
 .leaflet-control-attribution a {
-  color: #60a5fa !important;
+  color: #3b82f6 !important;
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar — pastel blue */
 ::-webkit-scrollbar {
   width: 4px;
 }
@@ -66,14 +66,14 @@ html, body, #root {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.3);
+  background: rgba(147, 197, 253, 0.5);
   border-radius: 2px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.5);
+  background: rgba(96, 165, 250, 0.7);
 }
 
-/* Glassmorphism utilities */
+/* Legacy glassmorphism utilities (used in map controls) */
 .glass {
   background: rgba(15, 23, 42, 0.75);
   backdrop-filter: blur(16px);
@@ -88,11 +88,6 @@ html, body, #root {
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-/* Layer toggle active state */
-.layer-btn-active {
-  box-shadow: 0 0 0 2px currentColor, 0 4px 12px rgba(0,0,0,0.4);
-}
-
 /* Pulse animation for live indicator */
 @keyframes livePulse {
   0%, 100% { opacity: 1; transform: scale(1); }
@@ -103,17 +98,18 @@ html, body, #root {
   animation: livePulse 2s ease-in-out infinite;
 }
 
-/* Transition for sidebar */
+/* Sidebar slide transition */
 .sidebar-transition {
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
               opacity 0.3s ease;
 }
 
-/* Custom tooltip */
+/* Leaflet tooltip */
 .custom-tooltip {
   background: rgba(15, 23, 42, 0.9) !important;
   border: 1px solid rgba(255,255,255,0.1) !important;
   color: #e2e8f0 !important;
+  -webkit-backdrop-filter: blur(8px) !important;
   backdrop-filter: blur(8px) !important;
   border-radius: 8px !important;
   padding: 8px 12px !important;
