@@ -271,7 +271,9 @@ export default function Sidebar({
         onClick={onToggle}
         className="fixed top-1/2 -translate-y-1/2 z-[1000] flex items-center justify-center w-7 h-16 rounded-r-2xl transition-all duration-300"
         style={{
-          left: isOpen ? 'min(340px, 85vw)' : '0',
+          left: isOpen
+            ? 'calc(var(--nav-x, 0px) + min(340px, 85vw))'
+            : 'var(--nav-x, 0px)',
           background: 'rgba(255,255,255,0.97)',
           backdropFilter: 'blur(12px)',
           border: '1px solid #e0eaff',
@@ -286,8 +288,9 @@ export default function Sidebar({
 
       {/* ── Panel ── */}
       <aside
-        className="fixed top-0 left-0 h-full z-[999] flex flex-col sidebar-transition"
+        className="fixed top-0 h-full z-[999] flex flex-col sidebar-transition"
         style={{
+          left: 'var(--nav-x, 0px)',
           width: 'min(340px, 85vw)',
           transform: isOpen ? 'translateX(0)' : 'translateX(-100%)',
           opacity: isOpen ? 1 : 0,
@@ -327,7 +330,7 @@ export default function Sidebar({
         </div>
 
         {/* ── Scrollable content ── */}
-        <div className="flex-1 overflow-y-auto px-4 pb-24 space-y-4">
+        <div className="flex-1 overflow-y-auto px-4 pb-[76px] md:pb-6 space-y-4">
 
           {/* Quick stats */}
           <div className="grid grid-cols-3 gap-2">

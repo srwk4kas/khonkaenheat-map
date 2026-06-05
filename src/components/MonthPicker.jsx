@@ -37,13 +37,15 @@ export default function MonthPicker({ selectedMonth, onChange, sidebarOpen }) {
   const currentMonths = byYear[yearIdx] ?? [];
   const thYear = (currentMonths[0]?.year ?? new Date().getFullYear()) + 543;
 
-  const leftOffset = sidebarOpen ? 'calc(min(340px, 85vw) + 16px)' : '16px';
+  const leftOffset = sidebarOpen
+    ? 'calc(var(--nav-x, 0px) + min(340px, 85vw) + 16px)'
+    : 'calc(var(--nav-x, 0px) + 16px)';
 
   return (
     <div
       className="fixed z-[999] flex items-center gap-3 px-4 py-2.5 rounded-2xl"
       style={{
-        bottom: '76px',
+        bottom: 'calc(var(--nav-bottom, 0px) + 16px)',
         left: leftOffset,
         right: '240px',
         background: 'rgba(8,12,26,0.92)',

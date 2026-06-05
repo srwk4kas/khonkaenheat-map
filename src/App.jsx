@@ -70,7 +70,9 @@ export default function App() {
       {/* ── Map tab ── */}
       {onMap && (
         <>
-          <div className="absolute inset-x-0 top-0" style={{ bottom: '60px' }}>
+          {/* Map area: offset left for desktop rail, bottom for mobile bar */}
+          <div className="absolute top-0 right-0"
+            style={{ left: 'var(--nav-x)', bottom: 'var(--nav-bottom)' }}>
             <MapView
               activeLayers={activeLayers}
               tambons={tambons}
