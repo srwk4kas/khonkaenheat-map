@@ -151,7 +151,7 @@ export default function Map3DView({ onClose }) {
 
       {/* ── Control panel (always visible on desktop, togglable on mobile) ── */}
       <div
-        className={`absolute right-14 z-10 rounded-xl flex flex-col gap-3 transition-all duration-200 ${panelOpen ? 'flex' : 'hidden md:flex'}`}
+        className={`absolute right-14 z-10 rounded-xl transition-all duration-200 ${panelOpen ? 'flex flex-col gap-3' : 'hidden md:flex md:flex-col md:gap-3'}`}
         style={{
           top: '72px', width: '190px', padding: '12px',
           background: 'rgba(15,23,42,0.9)',
