@@ -496,6 +496,17 @@ export default function MapView({ activeLayers, tambons, selectedDistrict, onDis
           maxZoom={19}
           maxNativeZoom={nativeZoom}
         />
+        {/* Satellite labels overlay — transparent label tiles on top of imagery */}
+        {(basemap === 'satellite' || basemap === 'historical') && (
+          <TileLayer
+            key={`labels-${tileKey}`}
+            url="https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
+            attribution=""
+            maxZoom={19}
+            maxNativeZoom={19}
+            opacity={1}
+          />
+        )}
 
         <BoundsLocker />
         <MapClickHandler
