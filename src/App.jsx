@@ -10,10 +10,12 @@ import ChatBotView from './components/ChatBotView';
 import ForecastTimePicker, { toApiStr } from './components/ForecastTimePicker';
 import MonthPicker from './components/MonthPicker';
 import { useRealtimeWeather } from './hooks/useRealtimeWeather';
+import { useTMDWeather } from './hooks/useTMDWeather';
 import { usePins } from './hooks/usePins';
 
 export default function App() {
-  const { tambons, forecast, dailyMax, dailyMin, status: weatherStatus, lastUpdated, refresh: refreshWeather } = useRealtimeWeather();
+  const { tambons, forecast, dailyMax: omDailyMax, dailyMin: omDailyMin, status: weatherStatus, lastUpdated, refresh: refreshWeather } = useRealtimeWeather();
+  const { data: tmdData, dailyMax: tmdDailyMax, dailyMin: tmdDailyMin } = useTMDWeather();
   const { pins, count: pinCount, addPin, deleteLastPin, isSupabase } = usePins();
   const [activeTab, setActiveTab] = useState('home');
   const [activeLayers, setActiveLayers] = useState(new Set());
@@ -128,8 +130,9 @@ export default function App() {
           weatherStatus={weatherStatus}
           lastUpdated={lastUpdated}
           onRefresh={refreshWeather}
-          tmdTempMax={dailyMax}
-          tmdTempMin={dailyMin}
+          tmdTempMax={tmdDailyMax ?? omDailyMax}
+          tmdTempMin={tmdDailyMin ?? omDailyMin}
+          tmdData={tmdData}
         />
       )}
 

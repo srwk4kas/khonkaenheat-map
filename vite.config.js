@@ -13,6 +13,16 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/tmd-api/, ''),
       },
+      '/tmd-weather': {
+        target: 'https://data.tmd.go.th',
+        changeOrigin: true,
+        secure: false,
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq) => {
+            proxyReq.path = '/api/Weather3Hours/v2/?uid=api&ukey=api12345';
+          });
+        },
+      },
     },
   },
 })
