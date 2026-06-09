@@ -10,9 +10,11 @@ import ChatBotView from './components/ChatBotView';
 import ForecastTimePicker, { toApiStr } from './components/ForecastTimePicker';
 import MonthPicker from './components/MonthPicker';
 import { useRealtimeWeather } from './hooks/useRealtimeWeather';
+import { usePins } from './hooks/usePins';
 
 export default function App() {
   const { tambons, forecast, status: weatherStatus, lastUpdated, refresh: refreshWeather } = useRealtimeWeather();
+  const { pins, count: pinCount, addPin, deleteLastPin, isSupabase } = usePins();
   const [activeTab, setActiveTab] = useState('home');
   const [activeLayers, setActiveLayers] = useState(new Set());
   const [infoLayer, setInfoLayer] = useState('temperature');
@@ -83,6 +85,11 @@ export default function App() {
               layerSettings={layerSettings}
               selectedMonth={selectedMonth}
               flyToTarget={flyToTarget}
+              pins={pins}
+              onAddPin={addPin}
+              onDeleteLastPin={deleteLastPin}
+              pinCount={pinCount}
+              isSupabase={isSupabase}
             />
           </div>
           <Sidebar
