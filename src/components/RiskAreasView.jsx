@@ -30,7 +30,7 @@ function parsePlaceName(data, fallback) {
   return { name, sub };
 }
 
-export default function RiskAreasView({ tambons }) {
+export default function RiskAreasView({ tambons, onLocationClick }) {
   const riskTambons = [...(tambons || [])].sort((a, b) => b.heatValue - a.heatValue).slice(0, 8);
   const [geoNames, setGeoNames] = useState({});
   const [geoStatus, setGeoStatus] = useState('loading'); // loading | ok | error
@@ -106,8 +106,9 @@ export default function RiskAreasView({ tambons }) {
               const dotColor  = isExtreme ? '#ef4444' : '#f97316';
               const place     = geoNames[h.id];
               return (
-                <div key={h.id} className="rounded-2xl p-4 bg-white"
-                  style={{ border: `1.5px solid ${isExtreme ? '#fca5a5' : '#fed7aa'}` }}>
+                <div key={h.id} className="rounded-2xl p-4 bg-white cursor-pointer active:scale-[0.98] transition-transform hover:shadow-md"
+                  style={{ border: `1.5px solid ${isExtreme ? '#fca5a5' : '#fed7aa'}` }}
+                  onClick={() => onLocationClick?.({ lat: h.lat, lng: h.lng })}>
                   <div className="flex items-start gap-3">
 
                     {/* Pulsing dot */}
@@ -174,8 +175,9 @@ export default function RiskAreasView({ tambons }) {
               const hColor = getHeatColor(d.heatValue);
               const hLevel = getHeatLevel(d.heatValue);
               return (
-                <div key={d.id} className="rounded-2xl px-4 py-3 bg-white flex items-center gap-3"
-                  style={{ border: '1px solid #ffe4cc' }}>
+                <div key={d.id} className="rounded-2xl px-4 py-3 bg-white flex items-center gap-3 cursor-pointer active:scale-[0.98] transition-transform hover:shadow-md"
+                  style={{ border: '1px solid #ffe4cc' }}
+                  onClick={() => onLocationClick?.({ lat: d.lat, lng: d.lng })}>
                   <span className="text-sm font-black w-5 text-right flex-shrink-0"
                     style={{ color: i < 3 ? '#ef4444' : '#f97316' }}>
                     {i + 1}

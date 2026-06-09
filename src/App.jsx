@@ -146,7 +146,16 @@ export default function App() {
       {activeTab === 'simulation' && <SimulationView />}
 
       {/* ── Risk Areas tab ── */}
-      {activeTab === 'risk-areas' && <RiskAreasView tambons={tambons} />}
+      {activeTab === 'risk-areas' && (
+        <RiskAreasView
+          tambons={tambons}
+          onLocationClick={({ lat, lng }) => {
+            setFlyToTarget({ lat, lng, ts: Date.now() });
+            setSidebarOpen(true);
+            setActiveTab('map');
+          }}
+        />
+      )}
 
       {/* ── Recurring tab ── */}
       {activeTab === 'recurring' && <RecurringView />}
