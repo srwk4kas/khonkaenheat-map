@@ -135,86 +135,82 @@ function ForecastStrip({ forecast, tmdData }) {
   }
 
   return (
-    <div className="rounded-3xl overflow-hidden" style={{
+    <div className="rounded-3xl" style={{
       background: 'linear-gradient(135deg,rgba(255,255,255,0.92),rgba(240,249,255,0.88))',
       border: '1px solid rgba(186,230,253,0.5)',
       backdropFilter: 'blur(12px)',
     }}>
-      <div className="px-4 pt-4 pb-2 flex items-center justify-between">
+      <div className="px-4 pt-3 pb-2 flex items-center justify-between">
         <p className="text-[11px] font-extrabold uppercase tracking-widest"
           style={{ background: 'linear-gradient(90deg,#f97316,#8b5cf6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
           พยากรณ์รายชั่วโมง
         </p>
-        <div className="flex items-center gap-2 text-[9px] text-slate-400">
-          <span className="flex items-center gap-0.5"><FaThermometerHalf size={7} className="text-orange-400" /> อุณหภูมิ</span>
+        <div className="flex items-center gap-1.5 text-[9px] text-slate-400">
+          <span className="flex items-center gap-0.5"><FaThermometerHalf size={7} className="text-orange-400" /> °C</span>
           <span className="flex items-center gap-0.5"><FaTint size={7} className="text-cyan-400" /> ชื้น</span>
           <span className="flex items-center gap-0.5"><FaSun size={7} className="text-yellow-400" /> UV</span>
           <span className="flex items-center gap-0.5"><FaCloudRain size={7} className="text-blue-400" /> ฝน</span>
         </div>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto px-4 pb-4 pt-1"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-        {forecast.map((h) => {
-          const tc   = getTemperatureColor(h.temperature);
-          const pc   = getPM25Color(h.pm25);
-          const uvc  = getUVLevel(h.uvIndex ?? 0).color;
-          const rain = h.isCurrent && tmdData?.rainfall != null
-            ? tmdData.rainfall
-            : (h.precipitation ?? 0);
-          const hasRain = rain > 0;
-          return (
-            <div key={h.time}
-              className="flex-shrink-0 rounded-2xl flex flex-col items-center gap-1.5 pt-3 pb-3 px-2.5"
-              style={{
-                width: '68px',
-                background: h.isCurrent
-                  ? 'linear-gradient(160deg,#f97316,#db2777,#8b5cf6)'
-                  : 'rgba(255,255,255,0.7)',
-                border:     h.isCurrent ? 'none' : '1px solid rgba(186,230,253,0.6)',
-                boxShadow:  h.isCurrent ? '0 6px 24px rgba(219,39,119,0.35)' : '0 2px 8px rgba(0,0,0,0.04)',
-              }}>
-              {h.dateLabel && (
-                <span className="text-[7px] font-bold px-1.5 py-0.5 rounded-full leading-none"
-                  style={{ background: h.isCurrent ? 'rgba(255,255,255,0.25)' : '#e0e7ff', color: h.isCurrent ? 'white' : '#6366f1' }}>
-                  วันถัดไป
+      <div className="overflow-x-auto pb-3 px-3"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
+        <div className="flex gap-1.5" style={{ width: 'max-content' }}>
+          {forecast.slice(0, 12).map((h) => {
+            const tc   = getTemperatureColor(h.temperature);
+            const pc   = getPM25Color(h.pm25);
+            const uvc  = getUVLevel(h.uvIndex ?? 0).color;
+            const rain = h.isCurrent && tmdData?.rainfall != null
+              ? tmdData.rainfall
+              : (h.precipitation ?? 0);
+            const hasRain = rain > 0;
+            return (
+              <div key={h.time}
+                className="flex-shrink-0 rounded-2xl flex flex-col items-center gap-1 py-2.5 px-2"
+                style={{
+                  width: '58px',
+                  background: h.isCurrent
+                    ? 'linear-gradient(160deg,#f97316,#db2777,#8b5cf6)'
+                    : 'rgba(255,255,255,0.7)',
+                  border:    h.isCurrent ? 'none' : '1px solid rgba(186,230,253,0.6)',
+                  boxShadow: h.isCurrent ? '0 4px 16px rgba(219,39,119,0.3)' : 'none',
+                }}>
+                {h.dateLabel && (
+                  <span className="text-[6.5px] font-bold px-1 py-0.5 rounded-full leading-none"
+                    style={{ background: h.isCurrent ? 'rgba(255,255,255,0.25)' : '#e0e7ff', color: h.isCurrent ? 'white' : '#6366f1' }}>
+                    ถัดไป
+                  </span>
+                )}
+                <span className="text-[10px] font-bold leading-none"
+                  style={{ color: h.isCurrent ? 'rgba(255,255,255,0.8)' : '#94a3b8' }}>
+                  {String(h.hour).padStart(2,'0')}:00
                 </span>
-              )}
-              <span className="text-[11px] font-bold leading-none"
-                style={{ color: h.isCurrent ? 'rgba(255,255,255,0.8)' : '#94a3b8' }}>
-                {String(h.hour).padStart(2,'0')}:00
-              </span>
-              <span className="text-[17px] font-black leading-none"
-                style={{ color: h.isCurrent ? 'white' : tc }}>
-                {h.temperature}°
-              </span>
-              <div className="w-full h-px" style={{ background: h.isCurrent ? 'rgba(255,255,255,0.25)' : '#e2e8f0' }} />
-              <div className="grid grid-cols-2 gap-x-1 gap-y-0.5 w-full text-center">
-                <span className="text-[8.5px] font-semibold" style={{ color: h.isCurrent ? 'rgba(255,255,255,0.85)' : pc }}>
-                  {h.pm25}µg
+                <span className="text-[16px] font-black leading-none"
+                  style={{ color: h.isCurrent ? 'white' : tc }}>
+                  {h.temperature}°
                 </span>
-                <span className="text-[8.5px] font-semibold" style={{ color: h.isCurrent ? 'rgba(255,255,255,0.85)' : uvc }}>
-                  UV{h.uvIndex}
-                </span>
-                <span className="text-[8.5px]" style={{ color: h.isCurrent ? 'rgba(255,255,255,0.75)' : '#60a5fa' }}>
-                  {h.humidity}%
-                </span>
-                <span className="text-[8.5px]" style={{ color: h.isCurrent ? 'rgba(255,255,255,0.65)' : '#94a3b8' }}>
-                  {h.windSpeed}k
-                </span>
+                <div className="w-full h-px" style={{ background: h.isCurrent ? 'rgba(255,255,255,0.2)' : '#e2e8f0' }} />
+                <div className="grid grid-cols-2 gap-x-0.5 gap-y-0.5 w-full text-center">
+                  <span className="text-[7.5px] font-semibold" style={{ color: h.isCurrent ? 'rgba(255,255,255,0.85)' : pc }}>
+                    {h.pm25}µ
+                  </span>
+                  <span className="text-[7.5px] font-semibold" style={{ color: h.isCurrent ? 'rgba(255,255,255,0.85)' : uvc }}>
+                    UV{h.uvIndex}
+                  </span>
+                  <span className="text-[7.5px]" style={{ color: h.isCurrent ? 'rgba(255,255,255,0.75)' : '#60a5fa' }}>
+                    {h.humidity}%
+                  </span>
+                  <span className="flex items-center justify-center gap-0.5">
+                    <FaCloudRain size={6} style={{ color: h.isCurrent ? 'rgba(255,255,255,0.7)' : hasRain ? '#3b82f6' : '#cbd5e1' }} />
+                    <span className="text-[7.5px]" style={{ color: h.isCurrent ? (hasRain ? '#bae6fd' : 'rgba(255,255,255,0.45)') : (hasRain ? '#2563eb' : '#cbd5e1') }}>
+                      {rain}
+                    </span>
+                  </span>
+                </div>
               </div>
-              {/* Rain row */}
-              <div className="w-full h-px" style={{ background: h.isCurrent ? 'rgba(255,255,255,0.15)' : '#e2e8f0' }} />
-              <div className="flex items-center justify-center gap-0.5">
-                <FaCloudRain size={7} style={{ color: h.isCurrent ? 'rgba(255,255,255,0.7)' : hasRain ? '#3b82f6' : '#cbd5e1' }} />
-                <span className="text-[8.5px] font-semibold"
-                  style={{ color: h.isCurrent ? (hasRain ? 'rgba(147,210,255,1)' : 'rgba(255,255,255,0.5)') : (hasRain ? '#2563eb' : '#cbd5e1') }}>
-                  {rain > 0 ? `${rain}` : '0'}<span className="text-[7px]">mm</span>
-                </span>
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </div>
   );
@@ -354,52 +350,40 @@ export default function HomeView({ tambons, forecast, weatherStatus, lastUpdated
                 <SunCloud />
               </div>
 
-            </div>
-
-            {/* ── Max / Min cards ── */}
-            <div className="grid grid-cols-2 gap-2.5">
-              {/* Max */}
-              <div className="rounded-2xl p-4 flex items-center gap-3" style={{
-                background: 'linear-gradient(145deg,#fff7ed,#fed7aa)',
-                border: '1px solid rgba(251,146,60,0.45)',
-                boxShadow: '0 4px 20px rgba(251,146,60,0.2)',
-              }}>
-                <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: 'linear-gradient(135deg,#fb923c,#f97316)', boxShadow: '0 4px 12px rgba(249,115,22,0.4)' }}>
-                  <span className="text-white text-base font-black">↑</span>
+              {/* Max / Min row */}
+              <div className="relative flex gap-2.5 mt-4">
+                <div className="flex items-center gap-2 rounded-2xl px-3 py-2.5 flex-1"
+                  style={{ background: 'linear-gradient(135deg,rgba(254,215,170,0.25),rgba(252,129,74,0.25))', border: '1px solid rgba(251,146,60,0.4)' }}>
+                  <div className="w-7 h-7 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: 'linear-gradient(135deg,#fb923c,#f97316)' }}>
+                    <span className="text-white text-xs font-black">↑</span>
+                  </div>
+                  <div>
+                    <p className="text-orange-200 text-[9px] leading-none">สูงสุด</p>
+                    <p className="text-white text-lg font-black leading-tight">
+                      {displayMax != null ? displayMax : '--'}°<span className="text-xs">C</span>
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-[10px] text-orange-600/70 font-medium leading-none mb-1">สูงสุดวันนี้</p>
-                  <div className="flex items-end gap-0.5">
-                    <span className="text-2xl font-black text-orange-800 leading-none">
-                      {displayMax != null ? displayMax : '--'}
-                    </span>
-                    <span className="text-sm font-bold text-orange-500 mb-0.5">°C</span>
+                <div className="flex items-center gap-2 rounded-2xl px-3 py-2.5 flex-1"
+                  style={{ background: 'linear-gradient(135deg,rgba(165,243,252,0.2),rgba(34,211,238,0.2))', border: '1px solid rgba(34,211,238,0.35)' }}>
+                  <div className="w-7 h-7 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: 'linear-gradient(135deg,#22d3ee,#0891b2)' }}>
+                    <span className="text-white text-xs font-black">↓</span>
+                  </div>
+                  <div>
+                    <p className="text-cyan-200 text-[9px] leading-none">ต่ำสุด</p>
+                    <p className="text-white text-lg font-black leading-tight">
+                      {displayMin != null ? displayMin : '--'}°<span className="text-xs">C</span>
+                    </p>
                   </div>
                 </div>
               </div>
 
-              {/* Min */}
-              <div className="rounded-2xl p-4 flex items-center gap-3" style={{
-                background: 'linear-gradient(145deg,#ecfeff,#a5f3fc)',
-                border: '1px solid rgba(34,211,238,0.4)',
-                boxShadow: '0 4px 20px rgba(6,182,212,0.18)',
-              }}>
-                <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: 'linear-gradient(135deg,#22d3ee,#0891b2)', boxShadow: '0 4px 12px rgba(6,182,212,0.4)' }}>
-                  <span className="text-white text-base font-black">↓</span>
-                </div>
-                <div>
-                  <p className="text-[10px] text-cyan-700/70 font-medium leading-none mb-1">ต่ำสุดวันนี้</p>
-                  <div className="flex items-end gap-0.5">
-                    <span className="text-2xl font-black text-cyan-900 leading-none">
-                      {displayMin != null ? displayMin : '--'}
-                    </span>
-                    <span className="text-sm font-bold text-cyan-500 mb-0.5">°C</span>
-                  </div>
-                </div>
-              </div>
             </div>
+
+            {/* ── Hourly forecast ── */}
+            <ForecastStrip forecast={forecast} tmdData={tmdData} />
 
             {/* ── 5 stat cards ── */}
             <div className="grid grid-cols-3 gap-2.5">
@@ -606,8 +590,6 @@ export default function HomeView({ tambons, forecast, weatherStatus, lastUpdated
           </div>
         </div>
 
-        {/* ══ FORECAST STRIP ══ */}
-        <ForecastStrip forecast={forecast} tmdData={tmdData} />
 
       </div>
     </div>
