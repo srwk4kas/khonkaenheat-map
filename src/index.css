@@ -10,15 +10,13 @@
    ─────────────────────────────────────────────────────────────────────────── */
 :root {
   --nav-x:      0px;
-  --safe-top:   calc(env(safe-area-inset-top, 0px) + 24px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --nav-top:    calc(env(safe-area-inset-top, 0px) + 24px);
   --nav-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
 }
 @media (min-width: 768px) {
   :root {
     --nav-x:      80px;
-    --safe-top:   0px;
-    --safe-bottom: 0px;
+    --nav-top:    0px;
     --nav-bottom: 0px;
   }
 }

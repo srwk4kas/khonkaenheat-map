@@ -71,14 +71,14 @@ export default function App() {
 
   return (
     <div className="relative w-full overflow-hidden bg-[#f8faff]"
-      style={{ height: '100dvh', paddingTop: 'var(--safe-top)' }}>
+      style={{ height: '100dvh' }}>
 
       {/* ── Map tab ── */}
       {onMap && (
         <>
           {/* Map area: offset left for desktop rail, bottom for mobile bar */}
-          <div className="absolute top-0 right-0"
-            style={{ left: 'var(--nav-x)', bottom: 'var(--nav-bottom)' }}>
+          <div className="absolute right-0"
+            style={{ top: 'var(--nav-top)', left: 'var(--nav-x)', bottom: 'var(--nav-bottom)' }}>
             <MapView
               activeLayers={activeLayers}
               tambons={tambons}

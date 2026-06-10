@@ -290,8 +290,8 @@ export default function HomeView({ tambons, forecast, weatherStatus, lastUpdated
   }[weatherStatus] ?? { cls: 'bg-slate-400', label: '—', col: '#94a3b8' };
 
   return (
-    <div className="absolute top-0 right-0 overflow-y-auto"
-      style={{ left: 'var(--nav-x)', bottom: 'var(--nav-bottom)', background: 'linear-gradient(160deg,#cffafe 0%,#e0e7ff 45%,#fce7f3 100%)' }}>
+    <div className="absolute right-0 overflow-y-auto"
+      style={{ top: 'var(--nav-top)', left: 'var(--nav-x)', bottom: 'var(--nav-bottom)', background: 'linear-gradient(160deg,#cffafe 0%,#e0e7ff 45%,#fce7f3 100%)' }}>
 
       <div className="max-w-md md:max-w-5xl mx-auto px-4 md:px-8 pt-5 pb-8 space-y-4">
 
