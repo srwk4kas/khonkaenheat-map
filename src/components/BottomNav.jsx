@@ -40,7 +40,10 @@ export default function BottomNav({ activeTab, onTabChange }) {
       <nav
         className="md:hidden fixed bottom-0 left-0 right-0 z-[1001]"
         style={{
-          height: '60px',
+          height: 'calc(60px + env(safe-area-inset-bottom, 0px))',
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+          paddingLeft:   'env(safe-area-inset-left, 0px)',
+          paddingRight:  'env(safe-area-inset-right, 0px)',
           background: 'rgba(255,255,255,0.97)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
@@ -49,7 +52,7 @@ export default function BottomNav({ activeTab, onTabChange }) {
           overflow: 'visible',
         }}
       >
-        <div className="flex h-full">
+        <div className="flex" style={{ height: '60px' }}>
           {TABS.map(tab => {
             const Icon    = tab.icon;
             const isActive = activeTab === tab.id;

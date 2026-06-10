@@ -70,7 +70,8 @@ export default function App() {
   const onMap = activeTab === 'map';
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-[#f8faff]">
+    <div className="relative w-full overflow-hidden bg-[#f8faff]"
+      style={{ height: '100dvh', paddingTop: 'var(--safe-top)' }}>
 
       {/* ── Map tab ── */}
       {onMap && (
